@@ -1,15 +1,20 @@
 import { verifyToken } from '../services/jwtService.js';
+import { getTokenFromCookie } from '../services/cookieAuth.js';
 
 /**
- * Expects Authorization: Bearer <jwt>
- * Attaches req.user = { sub: phone } on success.
+ * Token from:
+ * 1) Authorization: Bearer <jwt>
+ * 2) Cookie: access_token=<jwt>
  */
 export function requireAuth(req, res, next) {
+  let token = null;
   const header = req.headers.authorization;
-  const token =
-    header && header.startsWith('Bearer ')
-      ? header.slice(7)
-      : null;
+  if (header && header.startsWith('Bearer ')) {
+    token = header.slice(7);
+  }
+  if (!token) {
+    token = getTokenFromCookie(req);
+  }
 
   const decoded = verifyToken(token);
   if (!decoded) {

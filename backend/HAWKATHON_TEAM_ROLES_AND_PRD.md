@@ -9,10 +9,10 @@
 
 | Person | Primary focus | Owns (from PRD) |
 |--------|----------------|------------------|
-| **Backend dev** | APIs, DB, auth, sync | FR-CONSULT signaling/queue, FR-DHR CRUD + versioning, FR-MED stock APIs, RBAC, audit logs |
-| **Frontend dev** | PWA / lite app | FR-RURAL UX, patient/doctor/pharmacy UIs, offline read (IndexedDB), i18n shell, low-bandwidth UI |
+| **Backend dev** | APIs, DB, auth, sync | FR-CONSULT signaling/queue, FR-DHR CRUD + versioning, RBAC, audit logs |
+| **Frontend dev** | PWA / lite app | FR-RURAL UX, patient/doctor UIs, offline read (IndexedDB), i18n shell, low-bandwidth UI |
 | **AI dev** | Triage + safety | FR-AI rule engine + optional small model, red-flag logic, disclaimers, logging for doctor review |
-| **Full-stack / integration** | Glue + demo | WebRTC/audio consult wiring, background sync, SMS/reminder stubs, deploy, demo script, pharmacy “lite” onboarding |
+| **Full-stack / integration** | Glue + demo | WebRTC/audio consult wiring, background sync, SMS/reminder stubs, deploy, demo script |
 
 > If you truly only have **backend + frontend + AI** (3 streams), merge integration into **backend** (WebRTC + sync) or **frontend** (PWA + IndexedDB sync).
 
@@ -37,14 +37,6 @@
 | **Frontend** | Offline cache of “last N consults + active Rx” (IndexedDB), assisted mode UI (profile picker for shared phone). |
 | **AI** | Read-only for demo—doctor sees AI triage inputs in summary if consult follows symptom flow. |
 
-### Medicine availability (FR-MED)
-
-| Stream | Responsibility |
-|--------|----------------|
-| **Backend** | Pharmacy entity, stock publish API, search by name/SKU, `updated_at` for stale badge, optional synonym table. |
-| **Frontend** | Search + list nearest + “call before visiting” + stale label. |
-| **AI** | Optional synonym/expansion (“generic name → molecule”) later; MVP can be static map in backend. |
-
 ### AI symptom checker (FR-AI)
 
 | Stream | Responsibility |
@@ -68,7 +60,6 @@
 Agree on **one OpenAPI or shared TypeScript types** for:
 
 - **Patient**, **Consult**, **Prescription**, **PrescriptionVersion**
-- **Pharmacy**, **StockItem** (molecule/form/strength + qty + `updated_at`)
 - **TriageSession** (inputs + outcome + disclaimer acknowledged)
 
 **Process:** Backend implements; frontend and AI consume. AI only needs triage endpoints + maybe read patient summary if you scope it.
@@ -77,12 +68,12 @@ Agree on **one OpenAPI or shared TypeScript types** for:
 
 ## 4. MVP sequencing (hackathon-safe)
 
-1. **Backend:** Auth (phone OTP stub) + patient + one prescription + one consult record + pharmacy + stock list with `updated_at`.
-2. **Frontend:** Register → book “consult” (can be simulated) → show Rx → search medicine → offline show last Rx from cache.
+1. **Backend:** Auth (phone OTP stub) + patient + one prescription + one consult record.
+2. **Frontend:** Register → book “consult” (can be simulated) → show Rx → offline show last Rx from cache.
 3. **AI:** Rule-based triage only—no model dependency for demo on bad network.
 4. **Integration:** One real audio path (WebRTC) or credible pre-recorded flow with real queue + real DB writes.
 
-**If time runs out:** Ship **audio consult + DHR + one pharmacy stock check** as per your PRD—that alone hits the PDF.
+**If time runs out:** Ship **audio consult + DHR** as per your PRD.
 
 ---
 
@@ -93,7 +84,7 @@ Agree on **one OpenAPI or shared TypeScript types** for:
 | **Backend** | “These endpoints are frozen: …” |
 | **Frontend** | “These screens work against mock; switching to real API tomorrow.” |
 | **AI** | “Triage returns enum only; no free-text diagnosis.” |
-| **Integration** | “Demo path: register → triage → queue → call → Rx → pharmacy search.” |
+| **Integration** | “Demo path: register → triage → queue → call → Rx.” |
 
 ---
 
@@ -102,7 +93,6 @@ Agree on **one OpenAPI or shared TypeScript types** for:
 | Risk | Owner |
 |------|--------|
 | AI wrong urgency | AI + backend (rules + logging) |
-| Pharmacies stale | Backend (`updated_at`) + frontend (badge + “call first”) |
 | Doctor adoption | Frontend (EMR-lite, &lt;2 min post-consult) |
 | Connectivity | Frontend offline cache + backend queue |
 | Literacy | Frontend (icons, assisted mode, i18n) |
@@ -124,8 +114,8 @@ Agree on **one OpenAPI or shared TypeScript types** for:
 
 | Stream | Scope |
 |--------|--------|
-| **Backend** | Data model + consult queue + Rx versioning + pharmacy stock + triage audit API. |
-| **Frontend** | Rural-first PWA, offline Rx read, consult + pharmacy flows, i18n. |
+| **Backend** | Data model + consult queue + Rx versioning + triage audit API. |
+| **Frontend** | Rural-first PWA, offline Rx read, consult flows, i18n. |
 | **AI** | Rule-based triage + red flags + disclaimers + session persistence. |
 | **4th person** | WebRTC/sync + demo orchestration—or fold into backend if you only have three devs. |
 
