@@ -10,7 +10,7 @@ const otpStore = new Map();
 const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const OTP_LENGTH = 6;
 
-function normalizePhone(phone) {
+export function normalizePhone(phone) {
   // JSON may send phone as number; Twilio needs E.164 string
   if (phone == null) return null;
   const s = String(phone).trim();

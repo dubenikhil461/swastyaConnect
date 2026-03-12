@@ -3,13 +3,19 @@ import cors from 'cors';
 import { config } from './config.js';
 import { connectMongo } from './db/connect.js';
 import authRoutes from './routes/auth.js';
+import adminRoutes from './routes/admin.js';
 import { requireAuth } from './middleware/auth.js';
 
 const app = express();
-app.use(cors());
+const options = {
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+};
+app.use(cors(options));
 app.use(express.json());
 
 app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
 
 // Example protected route
 app.get('/api/protected', requireAuth, (req, res) => {
@@ -33,6 +39,11 @@ async function main() {
     console.log('  POST /auth/send-otp   { "phone": "+1..." }');
     console.log('  POST /auth/verify-otp { "phone": "+1...", "code": "..." }');
     console.log('  GET  /auth/me         Authorization: Bearer <jwt>');
+    console.log('  POST /auth/doctor/send-otp   { doctorId, name, phone }');
+    console.log('  POST /auth/doctor/verify-otp { phone, code }');
+    console.log('  POST /auth/pharmacy/send-otp   { pharmacyId, name, phone }');
+    console.log('  POST /auth/pharmacy/verify-otp { phone, code }');
+    console.log('  GET  /admin/health    X-Admin-Email: nikhildubey461@gmail.com');
   });
 
   server.on('error', (err) => {

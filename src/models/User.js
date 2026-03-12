@@ -2,10 +2,21 @@ import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: () => new mongoose.Types.ObjectId(),
+    },
     phone: {
       type: String,
       required: true,
       unique: true,
+      trim: true,
+      index: true,
+      unique: true,
+    },
+    name: {
+      type: String,
+      required: true,
       trim: true,
       index: true,
     },
@@ -13,21 +24,25 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    isActive: {
+      type: Boolean,
+      default: false,
+    },
+    doctorId: {
+      type: String,
+      maxlength: 10,
+    },
+    pharmacyId: {
+      type: String,
+      trim: true,
+      sparse: true,
+      unique: true,
+    },
   },
   {
     timestamps: true, // createdAt, updatedAt
   }
 );
 
-// Avoid returning __v in JSON
-userSchema.set('toJSON', {
-  virtuals: true,
-  versionKey: false,
-  transform(_doc, ret) {
-    ret.id = ret._id.toString();
-    delete ret._id;
-    return ret;
-  },
-});
 
 export const User = mongoose.models.User || mongoose.model('User', userSchema);
