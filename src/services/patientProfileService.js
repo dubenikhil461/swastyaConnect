@@ -21,9 +21,6 @@ function defaultProfile() {
   return o;
 }
 
-/**
- * Merge stored patientProfile with defaults so API always returns full shape.
- */
 export function normalizeProfile(user) {
   const raw = user.patientProfile || {};
   const out = { ...defaultProfile() };
@@ -42,23 +39,18 @@ export async function getProfileByUserId(userId) {
   return normalizeProfile(user);
 }
 
-/**
- * Patch only allowed string fields; does not replace medicalReportUrls (use upload/remove endpoints).
- */
 export async function updateProfile(userId, patch) {
   const $set = {};
   for (const k of PROFILE_FIELDS) {
     if (Object.prototype.hasOwnProperty.call(patch, k)) {
       const v = patch[k];
-      if (v == null) {
-        $set[`patientProfile.${k}`] = '';
-      } else {
-        const s = String(v).trim();
-        if (s.length > 10000) {
-          throw Object.assign(new Error(`${k} too long (max 10000)`), { status: 400 });
-        }
-        $set[`patientProfile.${k}`] = s;
+      const s = v == null ? '' : String(v).trim();
+      if (s.length > 10000) {
+        const err = new Error(`${k} too long (max 10000)`);
+        err.status = 400;
+        throw err;
       }
+      $set[`patientProfile.${k}`] = s;
     }
   }
   if (Object.keys($set).length === 0) {
@@ -70,19 +62,19 @@ export async function updateProfile(userId, patch) {
   return user ? normalizeProfile(user) : null;
 }
 
-/**
- * Append ImageKit URL to medicalReportUrls (max 50).
- */
+const MAX_REPORTS = 50;
+
 export async function appendReportUrl(userId, url) {
-  const max = 50;
   const user = await User.findById(userId);
   if (!user) return null;
   if (!user.patientProfile) user.patientProfile = {};
   const urls = Array.isArray(user.patientProfile.medicalReportUrls)
     ? [...user.patientProfile.medicalReportUrls]
     : [];
-  if (urls.length >= max) {
-    throw Object.assign(new Error(`Maximum ${max} report images`), { status: 400 });
+  if (urls.length >= MAX_REPORTS) {
+    const err = new Error(`Maximum ${MAX_REPORTS} report images`);
+    err.status = 400;
+    throw err;
   }
   if (!urls.includes(url)) urls.push(url);
   user.patientProfile.medicalReportUrls = urls;
@@ -91,9 +83,6 @@ export async function appendReportUrl(userId, url) {
   return normalizeProfile(user.toObject());
 }
 
-/**
- * Remove a URL from medicalReportUrls by index or exact URL.
- */
 export async function removeReportUrl(userId, indexOrUrl) {
   const user = await User.findById(userId);
   if (!user) return null;
@@ -104,7 +93,9 @@ export async function removeReportUrl(userId, indexOrUrl) {
   } else if (typeof indexOrUrl === 'string') {
     urls = urls.filter((u) => u !== indexOrUrl);
   } else {
-    throw Object.assign(new Error('Invalid index or url'), { status: 400 });
+    const err = new Error('Invalid index or url');
+    err.status = 400;
+    throw err;
   }
   user.patientProfile.medicalReportUrls = urls;
   user.markModified('patientProfile');

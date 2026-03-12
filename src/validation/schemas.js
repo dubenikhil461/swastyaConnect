@@ -106,7 +106,7 @@ export const prescriptionCreateBody = Joi.object({
 
 const optionalProfileString = Joi.string().trim().max(10000).allow('');
 
-/** PATCH /api/patient/profile — all fields optional */
+/** PATCH /api/patient/profile */
 export const patientProfilePatchBody = Joi.object({
   address: optionalProfileString.optional(),
   city: optionalProfileString.optional(),

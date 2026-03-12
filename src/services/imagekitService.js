@@ -7,21 +7,17 @@ function getClient() {
   if (_client) return _client;
   const { publicKey, privateKey, urlEndpoint } = config.imagekit;
   if (!publicKey || !privateKey) {
-    throw Object.assign(new Error('ImageKit not configured'), {
-      status: 503,
-      code: 'IMAGEKIT_NOT_CONFIGURED',
-    });
+    const err = new Error('ImageKit not configured');
+    err.status = 503;
+    err.code = 'IMAGEKIT_NOT_CONFIGURED';
+    throw err;
   }
-  _client = new ImageKit({
-    publicKey,
-    privateKey,
-    urlEndpoint,
-  });
+  _client = new ImageKit({ publicKey, privateKey, urlEndpoint });
   return _client;
 }
 
 /**
- * Upload a file buffer to ImageKit. Returns { url, fileId, name }.
+ * Upload buffer to ImageKit. Returns { url, fileId, name }.
  */
 export async function uploadBuffer(buffer, fileName, { folder = '/medical-reports' } = {}) {
   const client = getClient();
@@ -32,9 +28,5 @@ export async function uploadBuffer(buffer, fileName, { folder = '/medical-report
     folder,
     useUniqueFileName: true,
   });
-  return {
-    url: result.url,
-    fileId: result.fileId,
-    name: result.name,
-  };
+  return { url: result.url, fileId: result.fileId, name: result.name };
 }

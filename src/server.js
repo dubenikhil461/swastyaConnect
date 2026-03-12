@@ -8,18 +8,13 @@ import patientApiRoutes from './routes/patientApi.js';
 import { requireAuth } from './middleware/auth.js';
 
 const app = express();
-// Credentials + cookies: cannot use origin '*'. Must echo specific Origin when credentials: true.
-const corsOrigin =
-  process.env.CORS_ORIGIN || 'http://localhost:5173';
-const corsOptions = {
-  origin:
-    corsOrigin === 'true'
-      ? true
-      : corsOrigin.split(',').map((s) => s.trim()),
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+// Credentials + cookies: cannot use origin '*'. Allow frontend dev server and env override.
+
+const options = {
+  origin: "*",
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 };
-app.use(cors(corsOptions));
+app.use(cors(options));
 app.use(express.json());
 
 app.use('/auth', authRoutes);
@@ -38,6 +33,10 @@ app.get('/health', (_, res) => res.json({ ok: true }));
 
 app.use((err, _req, res, _next) => {
   console.error(err);
+  // Multer / validation-style errors often have message only
+  if (err.message && (err.message.includes('Only image') || err.message.includes('File too large'))) {
+    return res.status(400).json({ error: err.message });
+  }
   res.status(500).json({ error: 'Internal server error' });
 });
 
@@ -56,8 +55,8 @@ async function main() {
     console.log('  POST /api/doctor/appointments   { patientPhone, scheduledAt, ... }');
     console.log('  GET  /api/doctor/prescriptions  (doctor JWT)');
     console.log('  POST /api/doctor/prescriptions  { patientMobile, notes, medicines }');
-    console.log('  GET  /api/patient/profile        (patient JWT)');
-    console.log('  PATCH /api/patient/profile       { address, city, ... }');
+    console.log('  GET  /api/patient/profile         (patient JWT)');
+    console.log('  PATCH /api/patient/profile        text fields');
     console.log('  POST /api/patient/profile/upload-report  multipart file');
   });
 
