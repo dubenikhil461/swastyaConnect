@@ -8,11 +8,9 @@ import { requireAuth } from './middleware/auth.js';
 
 const app = express();
 // Credentials + cookies: cannot use origin '*'. Allow frontend dev server and env override.
-const corsOrigin =
-  process.env.CORS_ORIGIN ||
-  'http://localhost:5173';
+
 const options = {
-  origin: corsOrigin === 'true' ? true : corsOrigin.split(',').map((s) => s.trim()),
+  origin: "*",
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 };
