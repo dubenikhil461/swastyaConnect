@@ -66,7 +66,7 @@ router.post('/doctor/send-otp', validateBody(doctorSendOtpBody), async (req, res
 /**
  * POST /auth/doctor/verify-otp
  * Body: { "phone": "...", "code": "123456" }
- * Creates doctor user (isActive false) and returns JWT after OTP approval.
+ * Creates doctor user and returns JWT after OTP verification.
  */
 router.post('/doctor/verify-otp', validateBody(doctorVerifyOtpBody), async (req, res) => {
   try {
@@ -75,7 +75,7 @@ router.post('/doctor/verify-otp', validateBody(doctorVerifyOtpBody), async (req,
     const token = signToken(to, userId);
     res.json({
       ok: true,
-      message: 'Verified. Awaiting admin approval before full access.',
+      message: 'Verified',
       token,
       tokenType: 'Bearer',
       expiresIn: process.env.JWT_EXPIRES_IN || '7d',
@@ -113,7 +113,7 @@ router.post('/pharmacy/send-otp', validateBody(pharmacySendOtpBody), async (req,
 /**
  * POST /auth/pharmacy/verify-otp
  * Body: { "phone": "...", "code": "123456" }
- * Creates pharmacy user (isActive false) and returns JWT after OTP approval.
+ * Creates pharmacy user and returns JWT after OTP verification.
  */
 router.post('/pharmacy/verify-otp', validateBody(pharmacyVerifyOtpBody), async (req, res) => {
   try {
@@ -122,7 +122,7 @@ router.post('/pharmacy/verify-otp', validateBody(pharmacyVerifyOtpBody), async (
     const token = signToken(to, userId);
     res.json({
       ok: true,
-      message: 'Verified. Awaiting admin approval',
+      message: 'Verified',
       token,
       tokenType: 'Bearer',
       expiresIn: process.env.JWT_EXPIRES_IN || '7d',
@@ -158,7 +158,7 @@ router.post('/verify-otp', validateBody(verifyOtpBody), async (req, res) => {
   } catch (e) {
     const status = e.status || 500;
     res.status(status).json({
-      error: e.message || 'Verification failed',
+      error: e.message || 'Verification failed',₹
     });
   }
 });
