@@ -1,10 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-/** Normalize admin allowlist email (lowercase trim). */
 export const config = {
-  /** Only this email may access /admin/* when sent in request (header or body). */
-  adminEmail: (process.env.ADMIN_EMAIL || 'nikhildubey461@gmail.com').trim().toLowerCase(),
   mongoUri: process.env.MONGODB_URI,
   port: process.env.PORT || 3000,
   jwtSecret: process.env.JWT_SECRET || 'dev-only-change-in-production',

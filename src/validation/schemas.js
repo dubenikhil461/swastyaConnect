@@ -58,28 +58,3 @@ export const pharmacySendOtpBody = Joi.object({
 
 /** POST /auth/pharmacy/verify-otp — same shape as verify-otp */
 export const pharmacyVerifyOtpBody = verifyOtpBody;
-
-/** MongoDB ObjectId string */
-const objectIdString = Joi.string()
-  .hex()
-  .length(24)
-  .required()
-  .messages({
-    'string.length': 'userId must be a valid 24-char hex id',
-    'any.required': 'userId is required',
-  });
-
-/** PATCH /admin/doctors/:userId/approve — params */
-export const adminApproveParams = Joi.object({
-  userId: objectIdString,
-}).unknown(false);
-
-/** Optional body when approving via PATCH with email in body */
-export const adminApproveBody = Joi.object({
-  email: Joi.string().trim().email().optional(),
-}).unknown(false);
-
-/** Admin email in query (when not using header) */
-export const adminEmailQuery = Joi.object({
-  email: Joi.string().trim().email().optional(),
-}).unknown(true);

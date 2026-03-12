@@ -70,7 +70,7 @@ export async function sendPharmacyOtp({ pharmacyId, name, phone }) {
 }
 
 /**
- * Pharmacy signup step 2: verify OTP then create pharmacy user (isActive false until admin approves).
+ * Pharmacy signup step 2: verify OTP then create pharmacy user.
  */
 export async function verifyPharmacyOtp(phone, code) {
   const { to } = await verifyOtp(phone, code);
@@ -97,7 +97,7 @@ export async function verifyPharmacyOtp(phone, code) {
       phone: to,
       name: pending.name,
       pharmacyId: pending.pharmacyId,
-      isActive: false,
+      isActive: true,
       createdAt: user.createdAt,
     },
     userId,

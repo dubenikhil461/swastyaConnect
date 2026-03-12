@@ -70,7 +70,7 @@ export async function sendDoctorOtp({ doctorId, name, phone }) {
 }
 
 /**
- * Doctor signup step 2: verify OTP then create doctor user (isActive false until admin approves).
+ * Doctor signup step 2: verify OTP then create doctor user.
  * Returns user doc suitable for JWT (same shape as regular verify).
  */
 export async function verifyDoctorOtp(phone, code) {
@@ -89,7 +89,7 @@ export async function verifyDoctorOtp(phone, code) {
     phone: to,
     name: pending.name,
     doctorId: pending.doctorId,
-    isActive: false,
+    isActive: true,
   });
 
   const userId = user._id.toString();
@@ -100,7 +100,7 @@ export async function verifyDoctorOtp(phone, code) {
       phone: to,
       name: pending.name,
       doctorId: pending.doctorId,
-      isActive: false,
+      isActive: true,
       createdAt: user.createdAt,
     },
     userId,
