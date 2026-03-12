@@ -21,11 +21,8 @@ router.post('/send-otp', validateBody(sendOtpBody), async (req, res) => {
   try {
     const { phone, name } = req.body;
     const existingUser = await User.findOne({ phone });
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists With this phone number' });
-    }
     await sendOtp(phone);
-    await User.create({ phone, name, role: 'patient' });
+    await User.updateOne({ phone }, { $set: { name, role: 'patient' } }, { upsert: true });
     res.json({
       ok: true,
       message: 'OTP sent to your mobile number',
