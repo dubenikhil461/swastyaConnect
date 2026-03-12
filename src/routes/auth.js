@@ -8,6 +8,7 @@ import { upsertUserByPhone, findUserByPhone, findUserById } from '../services/us
 import { requireAuth } from '../middleware/auth.js';
 import { setAuthCookie, clearAuthCookie } from '../services/cookieAuth.js';
 import { User } from '../models/User.js';
+
 const router = Router();
 
 /** Doctor email/password auth — no OTP */
@@ -28,12 +29,12 @@ router.post('/send-otp', validateBody(sendOtpBody), async (req, res) => {
     await User.updateOne({ phone }, { $set: { name, role: 'patient' } }, { upsert: true });
     res.json({
       ok: true,
-      message: 'OTP sent to your mobile number',
+      message: 'OTP sent to your mobile number'
     });
   } catch (e) {
     const status = e.status || 500;
     res.status(status).json({
-      error: e.message || 'Failed to send OTP',
+      error: e.message || 'Failed to send OTP'
     });
   }
 });
@@ -62,12 +63,12 @@ router.post('/verify-otp', validateBody(verifyOtpBody), async (req, res) => {
         phone: user.phone,
         role,
         createdAt: user.createdAt,
-      },
+      }
     });
   } catch (e) {
     const status = e.status || 500;
     res.status(status).json({
-      error: e.message || 'Verification failed',
+      error: e.message || 'Verification failed'
     });
   }
 });

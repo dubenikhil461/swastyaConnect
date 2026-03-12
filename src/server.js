@@ -8,13 +8,18 @@ import patientApiRoutes from './routes/patientApi.js';
 import { requireAuth } from './middleware/auth.js';
 
 const app = express();
-// Credentials + cookies: cannot use origin '*'. Allow frontend dev server and env override.
-
-const options = {
-  origin: "*",
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+// Credentials + cookies: cannot use origin '*'. Must echo specific Origin when credentials: true.
+const corsOrigin =
+  process.env.CORS_ORIGIN || 'http://localhost:5173';
+const corsOptions = {
+  origin:
+    corsOrigin === 'true'
+      ? true
+      : corsOrigin.split(',').map((s) => s.trim()),
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
 };
-app.use(cors(options));
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use('/auth', authRoutes);
