@@ -103,3 +103,31 @@ export const prescriptionCreateBody = Joi.object({
     return value;
   })
   .unknown(false);
+
+const optionalProfileString = Joi.string().trim().max(10000).allow('');
+
+/** PATCH /api/patient/profile — all fields optional */
+export const patientProfilePatchBody = Joi.object({
+  address: optionalProfileString.optional(),
+  city: optionalProfileString.optional(),
+  district: optionalProfileString.optional(),
+  state: optionalProfileString.optional(),
+  pincode: optionalProfileString.optional(),
+  bloodGroup: optionalProfileString.optional(),
+  allergies: optionalProfileString.optional(),
+  existingDiseases: optionalProfileString.optional(),
+  currentMedications: optionalProfileString.optional(),
+  symptoms: optionalProfileString.optional(),
+  medicalReports: optionalProfileString.optional(),
+})
+  .min(1)
+  .messages({ 'object.min': 'at least one field required' })
+  .unknown(false);
+
+/** DELETE /api/patient/profile/report-url */
+export const patientReportUrlDeleteBody = Joi.object({
+  url: Joi.string().trim().min(1).optional(),
+  index: Joi.number().integer().min(0).optional(),
+})
+  .or('url', 'index')
+  .unknown(false);

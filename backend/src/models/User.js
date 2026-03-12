@@ -58,6 +58,28 @@ const userSchema = new mongoose.Schema(
       sparse: true,
       index: true,
     },
+    /**
+     * Patient-only health/profile fields (editable by patient).
+     * medicalReportUrls: ImageKit URLs after upload via POST /api/patient/profile/upload-report
+     */
+    patientProfile: {
+      address: { type: String, trim: true, default: '' },
+      city: { type: String, trim: true, default: '' },
+      district: { type: String, trim: true, default: '' },
+      state: { type: String, trim: true, default: '' },
+      pincode: { type: String, trim: true, default: '' },
+      bloodGroup: { type: String, trim: true, default: '' },
+      allergies: { type: String, trim: true, default: '' },
+      existingDiseases: { type: String, trim: true, default: '' },
+      currentMedications: { type: String, trim: true, default: '' },
+      symptoms: { type: String, trim: true, default: '' },
+      /** Free-text notes about reports; images live in medicalReportUrls */
+      medicalReports: { type: String, trim: true, default: '' },
+      medicalReportUrls: {
+        type: [String],
+        default: [],
+      },
+    },
   },
   {
     timestamps: true,

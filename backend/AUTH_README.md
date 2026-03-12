@@ -38,6 +38,11 @@ JWT_EXPIRES_IN=7d
 MONGODB_URI=mongodb+srv://USER:PASS@cluster.../swastyaconnect?retryWrites=true&w=majority
 
 PORT=3000
+
+# Patient profile — medical report images via ImageKit (https://ik.imagekit.io/ki6yi0wce)
+IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/ki6yi0wce
+IMAGEKIT_PUBLIC_KEY=your_public_key
+IMAGEKIT_PRIVATE_KEY=your_private_key
 ```
 
 ### MongoDB (Mongoose)
@@ -60,6 +65,10 @@ npm run dev
 | `POST` | `/auth/verify-otp` | `{ "phone": "+1...", "code": "123456" }` | Verifies code, returns JWT |
 | `GET` | `/auth/me` | `Authorization: Bearer <jwt>` | Returns current user (phone) |
 | `GET` | `/api/protected` | `Authorization: Bearer <jwt>` | Example protected route |
+| `GET` | `/api/patient/profile` | Patient JWT | Profile + address/health fields + report URLs |
+| `PATCH` | `/api/patient/profile` | `{ "address", "city", ... }` | Update text fields |
+| `POST` | `/api/patient/profile/upload-report` | `multipart/form-data` field `file` | Upload image → ImageKit, append URL |
+| `DELETE` | `/api/patient/profile/report-url` | `{ "url": "..." }` or `{ "index": 0 }` | Remove a report image URL |
 
 ### Example: cURL
 
