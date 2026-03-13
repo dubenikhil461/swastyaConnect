@@ -147,10 +147,10 @@ router.post('/send-otp', validateBody(sendOtpBody), async (req, res) => {
       ok: true,
       message: 'OTP sent to your mobile number',
       user: {
-        id: user.id,
-        phone: user.phone,
-        role: user.role,
-        createdAt: user.createdAt,
+        id: existingUser.id,
+        phone: existingUser.phone,
+        role: existingUser.role,
+        createdAt: existingUser.createdAt,
       },
     });
   } catch (e) {
