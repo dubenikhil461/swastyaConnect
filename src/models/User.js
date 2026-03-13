@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    /** Set when admin rejects a doctor; used to exclude from pending list */
+    rejectedAt: {
+      type: Date,
+      default: null,
+    },
     /**
      * Discriminator for CRUD / RBAC: patient (OTP/phone) vs doctor (email + doctorId).
      * Always set on create; legacy docs may lack it—middleware can backfill or treat as patient.
@@ -57,6 +62,12 @@ const userSchema = new mongoose.Schema(
       trim: true,
       sparse: true,
       index: true,
+    },
+    /** Doctor registration: phone, council, specialization (optional at signup) */
+    doctorProfile: {
+      phone: { type: String, trim: true, default: '' },
+      council: { type: String, trim: true, default: '' },
+      specialization: { type: String, trim: true, default: '' },
     },
     /** Patient-only; updated via PATCH /api/patient/profile */
     patientProfile: {

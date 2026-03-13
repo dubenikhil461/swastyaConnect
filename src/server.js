@@ -51,6 +51,9 @@ async function main() {
     console.log('  POST /auth/doctor/signup { email, password, name, doctorId }');
     console.log('  POST /auth/doctor/login  { email, password }');
     console.log('  POST /auth/doctor/approve { email, secret }  (DOCTOR_APPROVE_SECRET) — activate pending doctor');
+    console.log('  GET  /auth/doctors/pending   (x-admin-secret) — list pending doctors');
+    console.log('  POST /auth/doctors/approve/:id  (x-admin-secret) — approve doctor');
+    console.log('  POST /auth/doctors/reject/:id   (x-admin-secret) — reject doctor');
     console.log('  GET  /api/doctor/appointments   (doctor JWT)');
     console.log('  POST /api/doctor/appointments   { patientPhone, scheduledAt, ... }');
     console.log('  GET  /api/doctor/prescriptions  (doctor JWT)');

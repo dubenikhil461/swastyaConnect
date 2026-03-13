@@ -10,10 +10,10 @@ function statusError(message, status = 400) {
 }
 
 /**
- * Doctor signup: email + password + name + doctorId (no OTP).
- * Creates user with passwordHash; JWT issued by route.
+ * Doctor signup: email + password + name + doctorId; optional phone, council, specialization.
+ * Creates user with passwordHash; stores doctorProfile (phone, council, specialization).
  */
-export async function doctorSignup({ email, password, name, doctorId }) {
+export async function doctorSignup({ email, password, name, doctorId, phone, council, specialization }) {
   const emailNorm = String(email).trim().toLowerCase();
   const nameStr = String(name).trim();
   const doctorIdStr = String(doctorId).trim();
@@ -44,8 +44,12 @@ export async function doctorSignup({ email, password, name, doctorId }) {
     name: nameStr,
     doctorId: doctorIdStr,
     role: 'doctor',
-    /** Inactive until admin approval — no JWT/cookie until isActive true */
     isActive: false,
+    doctorProfile: {
+      phone: String(phone || '').trim().slice(0, 20),
+      council: String(council || '').trim().slice(0, 200),
+      specialization: String(specialization || '').trim().slice(0, 200),
+    },
   });
 
   const userId = user._id.toString();
@@ -126,7 +130,7 @@ export async function approveDoctorByEmail(email) {
   if (!emailNorm) return null;
   const user = await User.findOneAndUpdate(
     { email: emailNorm, role: 'doctor' },
-    { $set: { isActive: true } },
+    { $set: { isActive: true }, $unset: { rejectedAt: 1 } },
     { new: true }
   ).lean();
   if (!user) return null;
@@ -138,4 +142,96 @@ export async function approveDoctorByEmail(email) {
     role: 'doctor',
     isActive: user.isActive,
   };
+}
+
+/**
+ * List doctors pending approval (role=doctor, isActive=false, not rejected).
+ */
+export async function getPendingDoctors() {
+  const list = await User.find({
+    role: 'doctor',
+    isActive: false,
+    $or: [{ rejectedAt: null }, { rejectedAt: { $exists: false } }],
+  })
+    .sort({ createdAt: -1 })
+    .lean();
+  return list.map((u) => ({
+    id: u._id.toString(),
+    doctorId: u.doctorId || '',
+    name: u.name,
+    phone: u.email,
+    createdAt: u.createdAt,
+  }));
+}
+
+/**
+ * Approve doctor by DB id — sets isActive true.
+ */
+export async function approveDoctorById(id) {
+  const { Types } = await import('mongoose');
+  if (!Types.ObjectId.isValid(id)) return null;
+  const user = await User.findOneAndUpdate(
+    { _id: new Types.ObjectId(id), role: 'doctor' },
+    { $set: { isActive: true }, $unset: { rejectedAt: 1 } },
+    { new: true }
+  ).lean();
+  if (!user) return null;
+  return {
+    id: user._id.toString(),
+    email: user.email,
+    name: user.name,
+    doctorId: user.doctorId,
+    role: 'doctor',
+    isActive: user.isActive,
+  };
+}
+
+/**
+ * Reject doctor by DB id — sets rejectedAt so they no longer appear in pending.
+ */
+export async function rejectDoctorById(id) {
+  const { Types } = await import('mongoose');
+  if (!Types.ObjectId.isValid(id)) return null;
+  const user = await User.findOneAndUpdate(
+    { _id: new Types.ObjectId(id), role: 'doctor' },
+    { $set: { rejectedAt: new Date() } },
+    { new: true }
+  ).lean();
+  if (!user) return null;
+  return {
+    id: user._id.toString(),
+    email: user.email,
+    name: user.name,
+    doctorId: user.doctorId,
+    role: 'doctor',
+    isActive: user.isActive,
+  };
+}
+
+/**
+ * List all doctors for search (optionally filtered by ?q=).
+ * Includes basic profile fields and doctorProfile metadata.
+ */
+export async function listAllDoctors(query) {
+  const q = typeof query === 'string' ? query.trim() : '';
+  const criteria = { role: 'doctor' };
+
+  const list = await User.find(criteria)
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return list.map((u) => ({
+    id: u._id.toString(),
+    name: u.name,
+    email: u.email,
+    doctorId: u.doctorId || '',
+    isActive: !!u.isActive,
+    rejectedAt: u.rejectedAt || null,
+    createdAt: u.createdAt,
+    doctorProfile: {
+      phone: u.doctorProfile?.phone || '',
+      council: u.doctorProfile?.council || '',
+      specialization: u.doctorProfile?.specialization || '',
+    },
+  }));
 }

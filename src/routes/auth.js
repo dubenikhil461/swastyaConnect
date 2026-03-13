@@ -8,10 +8,72 @@ import { upsertUserByPhone, findUserByPhone, findUserById } from '../services/us
 import { requireAuth } from '../middleware/auth.js';
 import { setAuthCookie, clearAuthCookie } from '../services/cookieAuth.js';
 import { User } from '../models/User.js';
+import {
+  getPendingDoctors,
+  approveDoctorById,
+  rejectDoctorById,
+  listAllDoctors,
+} from '../services/doctorAuthService.js';
+
 const router = Router();
+
+/** Admin secret for doctor approval routes (header: x-admin-secret), default 12345678 */
+function requireAdminSecret(req, res, next) {
+  const secret = req.headers['x-admin-secret'] || req.body?.secret;
+  const expected = process.env.DOCTOR_APPROVE_SECRET || 'Admin1234567890';
+  if (secret !== expected) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+}
 
 /** Doctor email/password auth — no OTP */
 router.use('/doctor', doctorAuthRouter);
+
+/** Admin: list doctors pending approval. GET /auth/doctors/pending */
+router.get('/doctors/pending', requireAdminSecret, async (_req, res) => {
+  try {
+    const pending = await getPendingDoctors();
+    res.json({ count: pending.length, pending });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Failed to load pending doctors' });
+  }
+});
+
+/** Admin: approve doctor by id. POST /auth/doctors/approve/:id */
+router.post('/doctors/approve/:id', requireAdminSecret, async (req, res) => {
+  try {
+    const user = await approveDoctorById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'Doctor not found' });
+    res.json({ ok: true, message: 'Doctor approved', user });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Approve failed' });
+  }
+});
+
+/** Admin: reject doctor by id. POST /auth/doctors/reject/:id */
+router.post('/doctors/reject/:id', requireAdminSecret, async (req, res) => {
+  try {
+    const user = await rejectDoctorById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'Doctor not found' });
+    res.json({ ok: true, message: 'Doctor rejected', user });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Reject failed' });
+  }
+});
+
+/**
+ * Public: list all doctors for search (no auth or admin secret).
+ * GET /auth/doctors?q=harpreet
+ */
+router.get('/doctors', async (req, res) => {
+  try {
+    const doctors = await listAllDoctors(req.query.q);
+    res.json({ count: doctors.length, doctors });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Failed to list doctors' });
+  }
+});
 
 /**
  * POST /auth/send-otp

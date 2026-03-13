@@ -39,6 +39,9 @@ export const doctorSignupBody = Joi.object({
   doctorId: Joi.string().trim().min(1).max(100).required().messages({
     'any.required': 'doctorId is required',
   }),
+  phone: Joi.string().trim().max(20).allow('').optional(),
+  council: Joi.string().trim().max(200).allow('').optional(),
+  specialization: Joi.string().trim().max(200).allow('').optional(),
 }).unknown(false);
 
 /** POST /auth/doctor/login */

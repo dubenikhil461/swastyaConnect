@@ -15,12 +15,15 @@ const router = Router();
 
 router.post('/signup', validateBody(doctorSignupBody), async (req, res) => {
   try {
-    const { email, password, name, doctorId } = req.body;
+    const { email, password, name, doctorId, phone, council, specialization } = req.body;
     const { user, pendingApproval } = await doctorSignup({
       email,
       password,
       name,
       doctorId,
+      phone,
+      council,
+      specialization,
     });
     // No JWT/cookie until admin sets isActive — prevents dashboard access while pending
     clearAuthCookie(res);
