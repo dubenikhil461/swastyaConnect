@@ -121,11 +121,11 @@ router.post('/prescriptions/panel', async (req, res) => {
  */
 router.get('/prescriptions/panel', async (req, res) => {
   try {
-    const { patientId, doctorId, limit } = req.query;
+    const { patientId, doctorId, limit =20 } = req.query;
     const list = await listPanelPrescriptions({
       patientId,
       doctorId,
-      limit: limit ? parseInt(String(limit), 10) : undefined,
+      limit: parseInt(String(limit), 10),
     });
     res.json({ count: list.length, prescriptions: list });
   } catch (e) {
