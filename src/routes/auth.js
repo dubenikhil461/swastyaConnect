@@ -146,6 +146,12 @@ router.post('/send-otp', validateBody(sendOtpBody), async (req, res) => {
     res.json({
       ok: true,
       message: 'OTP sent to your mobile number',
+      user: {
+        id: user.id,
+        phone: user.phone,
+        role: user.role,
+        createdAt: user.createdAt,
+      },
     });
   } catch (e) {
     const status = e.status || 500;
