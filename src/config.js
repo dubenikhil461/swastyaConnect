@@ -8,8 +8,8 @@ export const config = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   imagekit: {
     urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT || 'https://ik.imagekit.io/ki6yi0wce',
-    publicKey: process.env.IMAGEKIT_PUBLIC_KEY || '',
-    privateKey: process.env.IMAGEKIT_PRIVATE_KEY || '',
+    publicKey: process.env.IMAGEKIT_PUBLIC_KEY || 'public_wPYVC0nZ9vbB5BYsSS8M80V2oZQ=',
+    privateKey: process.env.IMAGEKIT_PRIVATE_KEY || 'private_j6sbYWp1Ce46A+q0XuQMcsNn4jw=',
   },
   twilio: {
     accountSid: process.env.TWILIO_ACCOUNT_SID,

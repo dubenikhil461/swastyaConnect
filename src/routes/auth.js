@@ -14,6 +14,7 @@ import {
   rejectDoctorById,
   listAllDoctors,
 } from '../services/doctorAuthService.js';
+import { createPanelPrescription, listPanelPrescriptions } from '../services/panelPrescriptionService.js';
 
 const router = Router();
 
@@ -72,6 +73,63 @@ router.get('/doctors', async (req, res) => {
     res.json({ count: doctors.length, doctors });
   } catch (e) {
     res.status(500).json({ error: e.message || 'Failed to list doctors' });
+  }
+});
+
+/**
+ * Public: list all patients (User.role === 'patient') with basic info.
+ * GET /auth/patients
+ */
+router.get('/patients', async (_req, res) => {
+  try {
+    const patients = await User.find({ role: 'patient' })
+      .sort({ createdAt: -1 })
+      .select({ _id: 1, name: 1, phone: 1, createdAt: 1 })
+      .lean();
+    res.json({
+      count: patients.length,
+      patients: patients.map((p) => ({
+        id: p._id.toString(),
+        name: p.name,
+        phone: p.phone || '',
+        createdAt: p.createdAt,
+      })),
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Failed to list patients' });
+  }
+});
+
+/**
+ * Public: store a simple prescription from the doctor PrescriptionPanel.
+ * POST /auth/prescriptions/panel
+ * Body: { patientId, doctorId?, doctorName?, medicine, dosage, frequency, duration, notes? }
+ */
+router.post('/prescriptions/panel', async (req, res) => {
+  try {
+    const doc = await createPanelPrescription(req.body || {});
+    res.status(201).json({ ok: true, prescription: doc });
+  } catch (e) {
+    const status = e.status || 500;
+    res.status(status).json({ error: e.message || 'Failed to create prescription' });
+  }
+});
+
+/**
+ * Public: list panel prescriptions.
+ * GET /auth/prescriptions/panel?patientId=<userId>&doctorId=<doctorId>&limit=20
+ */
+router.get('/prescriptions/panel', async (req, res) => {
+  try {
+    const { patientId, doctorId, limit } = req.query;
+    const list = await listPanelPrescriptions({
+      patientId,
+      doctorId,
+      limit: limit ? parseInt(String(limit), 10) : undefined,
+    });
+    res.json({ count: list.length, prescriptions: list });
+  } catch (e) {
+    res.status(500).json({ error: e.message || 'Failed to list prescriptions' });
   }
 });
 
